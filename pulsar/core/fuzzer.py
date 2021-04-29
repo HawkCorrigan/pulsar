@@ -4,6 +4,8 @@ import os
 import sys
 import socket
 import time
+import serial
+import logging
 import json
 import urllib
 import errno
@@ -30,7 +32,9 @@ class Fuzzer:
     """
 
     def __init__(self, model_dir, path_conf):
-
+        
+        self.ser = serial.Serial('com3',9600,timeout=1)
+        logging.basicConfig(filename=os.environ['power_log_name'], encoding='utf-8', level=logging.DEBUG)
         self.model_dir = model_dir
         self.path_conf = path_conf
 
@@ -118,9 +122,17 @@ class Fuzzer:
                     print "socket: {} in send operation".format(e)
 
                 while self.status == FUZZ_STATUS_OK:
-                    #time.sleep(0.3)
+                    time.sleep(0.1)
                     try:
-                        rcv_message = connection.recv()
+                        rcv_message = "" #connection.recv()
+                        buffer = ""
+                        if buffer:
+                            if '\n' in buffer: 
+                                pass # skip if a line already in buffer
+                            else:
+                                buffer += ser.read(1)  # this will block until one more char or timeout
+                            buffer += ser.read(ser.inWaiting())
+                            logging.debug(buffer.split('\n')[-2])
                         if len(rcv_message) == 0:
                             e = SocketError("Received empty message")
                             e.errno = 0
