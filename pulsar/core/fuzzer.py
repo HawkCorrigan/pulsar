@@ -4,7 +4,6 @@ import os
 import sys
 import socket
 import time
-import serial
 import logging
 import json
 import urllib
@@ -12,6 +11,7 @@ import errno
 import ConfigParser
 import numpy as np
 
+import serial
 from ast import literal_eval
 from random import choice, randrange
 from socket import error as SocketError
@@ -33,7 +33,7 @@ class Fuzzer:
 
     def __init__(self, model_dir, path_conf):
         
-        self.ser = serial.Serial('com3',9600,timeout=1)
+        self.ser = serial.Serial(os.environ['usb_device'],9600,timeout=1)
         logging.basicConfig(filename=os.environ['power_log_name'], encoding='utf-8', level=logging.DEBUG)
         self.model_dir = model_dir
         self.path_conf = path_conf
